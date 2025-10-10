@@ -1,4 +1,5 @@
 local OpenCogNetwork, parent = torch.class('nn.OpenCogNetwork', 'nn.Module')
+local OpenCogValidator = require('OpenCogValidator')
 
 -- Complete OpenCog Neural Network: integrates AtomSpace, Attention, and PLN
 -- Implements a full cognitive architecture as a neural network module
@@ -135,9 +136,12 @@ function OpenCogNetwork:parameters()
 end
 
 function OpenCogNetwork:updateOutput(input)
-   -- Cognitive cycle implementation
+   -- Cognitive cycle implementation with validation
    -- Input: perception data
    -- Output: action decisions
+   
+   -- Validate input
+   OpenCogValidator.validateBatchInput(input, nil, self.perceptionSize)
    
    local batchSize = input:size(1)
    
@@ -264,9 +268,19 @@ function OpenCogNetwork:accGradParameters(input, gradOutput, scale)
 end
 
 function OpenCogNetwork:addKnowledge(conceptName, embedding, importance, truthValue)
-   -- Add explicit knowledge to the network
+   -- Add explicit knowledge to the network with validation
+   
+   -- Validate inputs
+   if type(conceptName) ~= "string" then
+      error("Concept name must be a string")
+   end
+   
    importance = importance or {sti = 50, lti = 0.5}
    truthValue = truthValue or {strength = 0.8, confidence = 0.7}
+   
+   OpenCogValidator.validateEmbedding(embedding, self.atomSize)
+   OpenCogValidator.validateAttentionValues(importance)
+   OpenCogValidator.validateTruthValue({truthValue.strength, truthValue.confidence})
    
    return self.atomSpace:addAtom('ConceptNode', embedding, importance.sti, importance.lti, 
                                 truthValue.strength, truthValue.confidence)
@@ -307,7 +321,17 @@ function OpenCogNetwork:stimulate(stimuli)
 end
 
 function OpenCogNetwork:setGoal(goalDescription, goalEmbedding, priority)
-   -- Set a new goal for the cognitive system
+   -- Set a new goal for the cognitive system with validation
+   if type(goalDescription) ~= "string" then
+      error("Goal description must be a string")
+   end
+   
+   OpenCogValidator.validateEmbedding(goalEmbedding, self.atomSize)
+   
+   if priority and (type(priority) ~= "number" or priority < 0 or priority > 1) then
+      error("Goal priority must be a number in range [0, 1]")
+   end
+   
    return self.workingMemory:pushGoal(goalDescription, goalEmbedding, priority)
 end
 
@@ -326,7 +350,15 @@ function OpenCogNetwork:addEpisode(perceptionData, actionData, reward)
 end
 
 function OpenCogNetwork:performAdvancedInference(premises, ruleSequence)
-   -- Perform advanced PLN inference with multiple rules
+   -- Perform advanced PLN inference with multiple rules and validation
+   
+   -- Validate inputs
+   if type(premises) ~= "table" or #premises == 0 then
+      error("Premises must be a non-empty table")
+   end
+   
+   OpenCogValidator.validateInferenceRules(ruleSequence)
+   
    self.inferenceCount = self.inferenceCount + 1
    
    if type(premises[1]) == 'number' then
@@ -405,6 +437,70 @@ function OpenCogNetwork:updateMemoryConsolidation()
          self:addKnowledge('Episode_' .. i, consolidatedEmbedding, importance, truthValue)
       end
    end
+end
+
+function OpenCogNetwork:healthCheck()
+   -- Comprehensive health check of the cognitive system
+   local health = {
+      overall = true,
+      issues = {},
+      warnings = {},
+      atomSpace = {},
+      workingMemory = {},
+      parameters = {},
+      gradients = {}
+   }
+   
+   -- Check AtomSpace health
+   health.atomSpace = OpenCogValidator.debugAtomSpace(self.atomSpace)
+   if #health.atomSpace.issues > 0 then
+      for _, issue in ipairs(health.atomSpace.issues) do
+         table.insert(health.warnings, "AtomSpace: " .. issue)
+      end
+   end
+   
+   -- Check working memory
+   local wmState = self.workingMemory:getWorkingMemoryState()
+   if wmState.numItems / wmState.capacity > 0.9 then
+      table.insert(health.warnings, "Working memory nearly full")
+   end
+   
+   if wmState.predictionAccuracy < 0.3 then
+      table.insert(health.warnings, "Low prediction accuracy: " .. 
+                   string.format("%.2f", wmState.predictionAccuracy))
+   end
+   
+   -- Check parameters and gradients
+   local params, gradParams = self:parameters()
+   if params and gradParams then
+      local gradHealth = OpenCogValidator.checkGradientHealth(gradParams)
+      health.gradients = gradHealth
+      
+      if not gradHealth.healthy then
+         health.overall = false
+         for _, issue in ipairs(gradHealth.issues) do
+            table.insert(health.issues, "Gradient: " .. issue)
+         end
+      end
+      
+      if gradHealth.avgGradNorm > 5 then
+         table.insert(health.warnings, "High gradient norm: " .. 
+                      string.format("%.2f", gradHealth.avgGradNorm))
+      end
+   end
+   
+   -- Check inference success rate
+   local successRate = self.inferenceCount > 0 and 
+                      (self.successfulInferences / self.inferenceCount) or 0
+   if successRate < 0.2 then
+      table.insert(health.warnings, "Low inference success rate: " .. 
+                   string.format("%.2f", successRate))
+   end
+   
+   -- Overall health assessment
+   health.overall = #health.issues == 0
+   
+   return health
 end
 
 function OpenCogNetwork:getCognitiveState()

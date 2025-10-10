@@ -235,4 +235,115 @@ When extending the OpenCog implementation:
 
 ---
 
+## Recent Enhancements (v2.0)
+
+### 🧠 Advanced Reasoning
+- **Extended PLN Rules**: Similarity, contraposition, hypothetical, and intensional reasoning
+- **Rule Chaining**: Complex inference sequences with multiple rule types
+- **Cached Inference**: Performance optimization with result caching
+
+### 💭 Working Memory System
+- **Goal Stack**: Hierarchical goal management with priorities and achievement tracking
+- **Episodic Buffer**: Experience replay with context and reward information
+- **Predictive System**: Future state prediction based on past experiences
+- **Context Tracking**: Dynamic context updates with history maintenance
+
+### 📊 Cognitive Metrics
+- **Real-time Monitoring**: Attention efficiency, memory utilization, reasoning success
+- **Performance Analytics**: Learning rates, adaptation speed, conceptual coherence
+- **System Health**: Gradient health, parameter stability, economic balance
+- **Detailed Reporting**: Comprehensive cognitive state analysis
+
+### 🛡️ Error Handling & Validation
+- **Input Validation**: Truth values, embeddings, batch dimensions, inference rules
+- **Health Checks**: System diagnostics and problem detection
+- **Gradient Monitoring**: NaN/infinity detection, exploding gradient alerts
+- **Memory Safety**: Capacity validation and boundary checking
+
+### ⚡ Performance Optimizations
+- **Attention Caching**: Fast focus computation and retrieval
+- **Batch Processing**: Efficient tensor operations and memory pooling
+- **Inference Caching**: Cached PLN results for repeated computations  
+- **Memory Management**: Optimized AtomSpace access and working memory
+
+### 🎯 Goal-Directed Behavior
+- **Autonomous Goal Setting**: Dynamic goal creation and management
+- **Achievement Tracking**: Success/failure monitoring with learning
+- **Episodic Learning**: Experience-based decision making
+- **Memory Consolidation**: Important experience transfer to long-term storage
+
+### 🧪 Comprehensive Testing
+- **Unit Tests**: Individual module validation
+- **Integration Tests**: End-to-end cognitive architecture testing
+- **Performance Tests**: Scalability and memory management validation
+- **Error Tests**: Validation and error handling verification
+
+## Files Overview
+
+**Core Modules:**
+- `OpenCogAtom.lua` - Knowledge units with attention and truth values
+- `OpenCogAtomSpace.lua` - Hypergraph knowledge storage and retrieval  
+- `OpenCogAttentionAllocation.lua` - Economic attention dynamics
+- `OpenCogPLN.lua` - Probabilistic logic networks with advanced rules
+- `OpenCogNetwork.lua` - Complete integrated cognitive architecture
+
+**Enhanced Modules:**
+- `OpenCogMetrics.lua` - Real-time cognitive performance monitoring
+- `OpenCogWorkingMemory.lua` - Goal management and episodic memory
+- `OpenCogValidator.lua` - Error handling and input validation utilities
+- `OpenCogOptimizer.lua` - Performance optimization utilities
+
+**Testing & Examples:**
+- `test_opencog.lua` - Basic functionality tests
+- `test_opencog_comprehensive.lua` - Complete test suite
+- `examples/opencog_example.lua` - Usage demonstrations
+
+## Quick Start Guide
+
+```lua
+require('nn')
+
+-- Create cognitive architecture
+local config = {
+   atomSpaceCapacity = 1000,
+   atomSize = 16, 
+   perceptionSize = 10,
+   actionSize = 8,
+   focusSize = 50
+}
+
+local cogNet = nn.OpenCogNetwork(config)
+
+-- Set goals
+local goalEmb = torch.randn(16)
+cogNet:setGoal("Learn patterns", goalEmb, 0.9)
+
+-- Add knowledge
+local catEmb = torch.randn(16)
+cogNet:addKnowledge('Cat', catEmb, 
+                   {sti=80, lti=0.7}, 
+                   {strength=0.9, confidence=0.8})
+
+-- Process perception and generate actions
+local perception = torch.randn(1, 10) 
+local actions = cogNet:forward(perception)
+
+-- Advanced reasoning
+local result = cogNet:performAdvancedInference({1, 2}, 
+                                             {'deduction', 'similarity'})
+
+-- Monitor cognitive state
+local state = cogNet:getCognitiveState()
+print("Attention efficiency:", state.metrics.attention.attentionalEfficiency)
+print("Memory utilization:", state.metrics.memory.utilization)
+
+-- Health check
+local health = cogNet:healthCheck()
+if health.overall then
+   print("System healthy!")
+else
+   print("Issues detected:", table.concat(health.issues, ", "))
+end
+```
+
 *This implementation brings the power of OpenCog's cognitive architecture to the neural network world, enabling the creation of truly intelligent systems that can reason, learn, and adapt.*

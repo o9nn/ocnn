@@ -229,5 +229,9 @@ require('nn.OpenCogNetwork')
 require('nn.OpenCogMetrics')
 require('nn.OpenCogWorkingMemory')
 
+-- OpenCog utilities (loaded as separate modules, not nn modules)
+-- OpenCogValidator and OpenCogOptimizer are utility modules
+-- accessed via require() rather than nn. prefix
+
 
 return nn
