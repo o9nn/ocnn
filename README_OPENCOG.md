@@ -19,6 +19,8 @@ OpenCog is a framework for Artificial General Intelligence (AGI) that combines:
 3. **`nn.OpenCogAttentionAllocation`** - Economic attention dynamics (STI/LTI)
 4. **`nn.OpenCogPLN`** - Probabilistic logic reasoning and inference
 5. **`nn.OpenCogNetwork`** - Complete integrated cognitive architecture
+6. **`nn.OpenCogMetrics`** - Real-time cognitive performance monitoring
+7. **`nn.OpenCogWorkingMemory`** - Goal management and episodic memory
 
 ### Key Features
 
@@ -29,6 +31,12 @@ OpenCog is a framework for Artificial General Intelligence (AGI) that combines:
 - ✅ **PLN Reasoning**: Deduction, induction, abduction, revision rules
 - ✅ **Cognitive Cycles**: Perception → Attention → Reasoning → Action loops
 - ✅ **Knowledge Integration**: Add explicit knowledge alongside learned representations
+- ✅ **Advanced PLN Rules**: Similarity, contraposition, hypothetical, intensional reasoning
+- ✅ **Working Memory**: Goal stack, episodic buffer, context tracking, predictions
+- ✅ **Cognitive Metrics**: Real-time monitoring of attention, memory, reasoning, learning
+- ✅ **Goal-Directed Behavior**: Hierarchical goal management and achievement tracking
+- ✅ **Episodic Learning**: Experience replay and memory consolidation
+- ✅ **Predictive Capabilities**: Future state prediction based on past experiences
 
 ## Quick Start
 

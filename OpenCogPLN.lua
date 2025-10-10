@@ -30,6 +30,19 @@ function OpenCogPLN:__init(maxPremises, conclusionSize)
    self.choiceWeight = torch.Tensor(1):fill(0.7)
    self.gradChoiceWeight = torch.Tensor(1):zero()
    
+   -- Advanced PLN inference rules (new)
+   self.similarityWeight = torch.Tensor(1):fill(0.8)
+   self.gradSimilarityWeight = torch.Tensor(1):zero()
+   
+   self.contrapositionWeight = torch.Tensor(1):fill(0.95)
+   self.gradContrapositionWeight = torch.Tensor(1):zero()
+   
+   self.hypotheticalWeight = torch.Tensor(1):fill(0.7)
+   self.gradHypotheticalWeight = torch.Tensor(1):zero()
+   
+   self.intensionalWeight = torch.Tensor(1):fill(0.85)
+   self.gradIntensionalWeight = torch.Tensor(1):zero()
+   
    -- Confidence combination parameters
    self.confidenceAlpha = torch.Tensor(1):fill(1.0)  -- evidence weight
    self.confidenceBeta = torch.Tensor(1):fill(1.0)   -- prior weight
@@ -50,6 +63,12 @@ function OpenCogPLN:reset()
    self.abductionWeight:uniform(0.4, 0.6)
    self.revisionWeight:uniform(0.8, 1.0)
    self.choiceWeight:uniform(0.6, 0.8)
+   
+   -- Initialize advanced rule weights
+   self.similarityWeight:uniform(0.7, 0.9)
+   self.contrapositionWeight:uniform(0.9, 1.0)
+   self.hypotheticalWeight:uniform(0.6, 0.8)
+   self.intensionalWeight:uniform(0.8, 0.9)
    
    self.confidenceAlpha:uniform(0.8, 1.2)
    self.confidenceBeta:uniform(0.8, 1.2)
@@ -334,6 +353,93 @@ function OpenCogPLN:inferenceChain(premises, ruleSequence)
    return currentConclusion
 end
 
+-- Advanced PLN inference rules
+function OpenCogPLN:similarityRule(belief1_tv, belief2_tv)
+   -- Similarity rule: P(A↔B) given P(A) and P(B)
+   local s1, c1 = belief1_tv[1], belief1_tv[2]
+   local s2, c2 = belief2_tv[1], belief2_tv[2]
+   
+   local similarityWeight = self.similarityWeight:squeeze()
+   
+   -- Compute similarity based on proximity of strengths
+   local strengthDiff = math.abs(s1 - s2)
+   local similarityStrength = (1 - strengthDiff) * similarityWeight
+   local similarityConfidence = (c1 * c2) * similarityWeight
+   
+   return {similarityStrength, similarityConfidence}
+end
+
+function OpenCogPLN:contrapositionRule(implication_tv)
+   -- Contraposition: P(A→B) ≡ P(¬B→¬A)
+   local s, c = implication_tv[1], implication_tv[2]
+   
+   local contrapositionWeight = self.contrapositionWeight:squeeze()
+   
+   -- Contraposition preserves truth value but may reduce confidence slightly
+   return {s * contrapositionWeight, c * contrapositionWeight}
+end
+
+function OpenCogPLN:hypotheticalReasoningRule(premise_tv, hypothesis_tv)
+   -- Hypothetical reasoning: Given hypothesis H and premise P, infer P|H
+   local s1, c1 = premise_tv[1], premise_tv[2]
+   local s2, c2 = hypothesis_tv[1], hypothesis_tv[2]
+   
+   local hypotheticalWeight = self.hypotheticalWeight:squeeze()
+   
+   -- Conditional probability estimation
+   local conditionalStrength = (s1 * s2) * hypotheticalWeight
+   local conditionalConfidence = math.min(c1, c2) * hypotheticalWeight
+   
+   return {conditionalStrength, conditionalConfidence}
+end
+
+function OpenCogPLN:intensionalReasoningRule(concept_tv, property_tv)
+   -- Intensional reasoning: properties and concepts
+   local s1, c1 = concept_tv[1], concept_tv[2]
+   local s2, c2 = property_tv[1], property_tv[2]
+   
+   local intensionalWeight = self.intensionalWeight:squeeze()
+   
+   -- Property inheritance strength
+   local inheritanceStrength = (s1 + s2) / 2 * intensionalWeight
+   local inheritanceConfidence = math.sqrt(c1 * c2) * intensionalWeight
+   
+   return {inheritanceStrength, inheritanceConfidence}
+end
+
+-- Enhanced inference chain with advanced rules
+function OpenCogPLN:advancedInferenceChain(premises, ruleSequence)
+   -- Apply advanced inference rules in sequence
+   local currentConclusion = premises[1]
+   
+   for i, ruleName in ipairs(ruleSequence) do
+      if i <= #premises - 1 then
+         local nextPremise = premises[i + 1]
+         
+         if ruleName == 'deduction' then
+            currentConclusion = self:deductionRule(currentConclusion, nextPremise)
+         elseif ruleName == 'induction' then
+            currentConclusion = self:inductionRule(currentConclusion, nextPremise)
+         elseif ruleName == 'abduction' then
+            currentConclusion = self:abductionRule(currentConclusion, nextPremise)
+         elseif ruleName == 'revision' then
+            currentConclusion = self:revisionRule(currentConclusion, nextPremise)
+         elseif ruleName == 'similarity' then
+            currentConclusion = self:similarityRule(currentConclusion, nextPremise)
+         elseif ruleName == 'contraposition' and i == 1 then
+            -- Contraposition applies to single premise
+            currentConclusion = self:contrapositionRule(currentConclusion)
+         elseif ruleName == 'hypothetical' then
+            currentConclusion = self:hypotheticalReasoningRule(currentConclusion, nextPremise)
+         elseif ruleName == 'intensional' then
+            currentConclusion = self:intensionalReasoningRule(currentConclusion, nextPremise)
+         end
+      end
+   end
+   
+   return currentConclusion
+end
+
 function OpenCogPLN:__tostring__()
    local str = 'nn.OpenCogPLN(' .. self.maxPremises .. ', ' .. self.conclusionSize .. ')'
    str = str .. '\n  Deduction weight: ' .. self.deductionWeight:squeeze()
@@ -341,5 +447,7 @@ function OpenCogPLN:__tostring__()
    str = str .. '\n  Abduction weight: ' .. self.abductionWeight:squeeze()
    str = str .. '\n  Revision weight: ' .. self.revisionWeight:squeeze()
    str = str .. '\n  Choice weight: ' .. self.choiceWeight:squeeze()
+   str = str .. '\n  Similarity weight: ' .. self.similarityWeight:squeeze()
+   str = str .. '\n  Contraposition weight: ' .. self.contrapositionWeight:squeeze()
    return str
 end

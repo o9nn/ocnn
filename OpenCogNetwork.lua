@@ -19,9 +19,14 @@ function OpenCogNetwork:__init(config)
    self.attentionAllocation = nn.OpenCogAttentionAllocation(self.atomSpaceCapacity, self.focusSize)
    self.pln = nn.OpenCogPLN(self.maxPremises, self.atomSize)
    
-   -- Working memory and cognitive cycle tracking  
-   self.workingMemory = {}
+   -- Enhanced components
+   self.workingMemory = nn.OpenCogWorkingMemory(20, self.atomSize)
+   self.cognitiveMetrics = nn.OpenCogMetrics()
+   
+   -- Cognitive cycle tracking  
    self.cycleCount = 0
+   self.inferenceCount = 0
+   self.successfulInferences = 0
    
    -- Perception and action interfaces
    self.perceptionLayer = nn.Linear(config.perceptionSize or 10, self.atomSize)
@@ -301,14 +306,133 @@ function OpenCogNetwork:stimulate(stimuli)
    end
 end
 
+function OpenCogNetwork:setGoal(goalDescription, goalEmbedding, priority)
+   -- Set a new goal for the cognitive system
+   return self.workingMemory:pushGoal(goalDescription, goalEmbedding, priority)
+end
+
+function OpenCogNetwork:achieveCurrentGoal()
+   -- Mark current goal as achieved and pop it
+   if self.workingMemory.currentGoal then
+      self.workingMemory.currentGoal.achieved = true
+      return self.workingMemory:popGoal()
+   end
+   return nil
+end
+
+function OpenCogNetwork:addEpisode(perceptionData, actionData, reward)
+   -- Add episodic memory entry
+   return self.workingMemory:addEpisode(perceptionData, actionData, reward)
+end
+
+function OpenCogNetwork:performAdvancedInference(premises, ruleSequence)
+   -- Perform advanced PLN inference with multiple rules
+   self.inferenceCount = self.inferenceCount + 1
+   
+   if type(premises[1]) == 'number' then
+      -- Premises are atom indices
+      local atomIndices = torch.LongTensor(premises)
+      local atomData = self.atomSpace:forward(atomIndices:view(-1, 1))
+      
+      -- Extract truth values for rule application
+      local truthValues = {}
+      for i = 1, atomData:size(1) do
+         local strength = atomData[i][self.atomSize + 3]  -- strength position
+         local confidence = atomData[i][self.atomSize + 4]  -- confidence position
+         table.insert(truthValues, {strength, confidence})
+      end
+      
+      local result = self.pln:advancedInferenceChain(truthValues, ruleSequence)
+      
+      -- Check if inference was successful (reasonable truth values)
+      if result[1] > 0.1 and result[2] > 0.1 then
+         self.successfulInferences = self.successfulInferences + 1
+      end
+      
+      return result
+   else
+      -- Direct truth values
+      local result = self.pln:advancedInferenceChain(premises, ruleSequence)
+      
+      if result[1] > 0.1 and result[2] > 0.1 then
+         self.successfulInferences = self.successfulInferences + 1
+      end
+      
+      return result
+   end
+end
+
+function OpenCogNetwork:predictNextState(currentState, horizon)
+   -- Predict future states based on current state and working memory
+   horizon = horizon or 1
+   
+   -- Use working memory episodic buffer to make predictions
+   local episodes = self.workingMemory.episodicBuffer
+   if #episodes < 2 then
+      return currentState:clone()  -- no prediction possible
+   end
+   
+   -- Simple prediction: find most similar past state and use its outcome
+   local bestSimilarity = -1
+   local bestNextState = nil
+   
+   for i = 1, #episodes - 1 do
+      local similarity = torch.dot(currentState, episodes[i].perception)
+      if similarity > bestSimilarity then
+         bestSimilarity = similarity
+         bestNextState = episodes[i + 1].perception:clone()
+      end
+   end
+   
+   if bestNextState then
+      self.workingMemory:addPrediction(bestNextState, math.min(bestSimilarity, 1.0))
+      return bestNextState
+   else
+      return currentState:clone()
+   end
+end
+
+function OpenCogNetwork:updateMemoryConsolidation()
+   -- Consolidate important experiences from working memory to long-term AtomSpace
+   local episodes = self.workingMemory.episodicBuffer
+   
+   for i, episode in ipairs(episodes) do
+      if episode.reward > 0.5 then  -- consolidate rewarding experiences
+         local consolidatedEmbedding = torch.cat({episode.perception, episode.action})
+         local importance = {sti = 60 + episode.reward * 20, lti = 0.3 + episode.reward * 0.4}
+         local truthValue = {strength = 0.8, confidence = 0.7 + episode.reward * 0.2}
+         
+         self:addKnowledge('Episode_' .. i, consolidatedEmbedding, importance, truthValue)
+      end
+   end
+end
+
 function OpenCogNetwork:getCognitiveState()
    -- Return current cognitive state for monitoring
+   local basicState = {
+      atomCount = self.atomSpace:getAtomCount(),
+      capacity = self.atomSpace:getCapacity(),
+      focusSize = self.focusSize,
+      cycleCount = self.cycleCount,
+      totalSTI = self.attentionAllocation:economicBalance().totalSTI,
+      totalLTI = self.attentionAllocation:economicBalance().totalLTI,
+      inferenceCount = self.inferenceCount,
+      successfulInferences = self.successfulInferences
+   }
+   
+   -- Get metrics
+   local metricsOutput = self.cognitiveMetrics:forward(basicState)
+   local detailedMetrics = self.cognitiveMetrics:getDetailedReport()
+   local workingMemoryState = self.workingMemory:getWorkingMemoryState()
+   
    return {
       atomSpace = self.atomSpace:__tostring__(),
-      attention = self.attentionAllocation:__tostring__(),
+      metrics = detailedMetrics,
+      workingMemory = workingMemoryState,
+      basic = basicState,
+      attentionAllocation = self.attentionAllocation:__tostring__(),
       pln = self.pln:__tostring__(),
-      cycleCount = self.cycleCount,
-      workingMemorySize = #self.workingMemory
+      cycleCount = self.cycleCount
    }
 end
 

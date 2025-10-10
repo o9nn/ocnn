@@ -305,6 +305,76 @@ This OpenCog implementation enables:
 - **Knowledge Graph Processing:** Differentiable graph reasoning and inference
 - **Cognitive Robotics:** Perception-action loops with embedded reasoning
 
+## Advanced Features
+
+### 6. OpenCogMetrics (`nn.OpenCogMetrics`)
+
+Real-time monitoring and analysis of cognitive processes.
+
+```lua
+metrics = nn.OpenCogMetrics()
+cogState = cogNet:getCognitiveState()
+metricsOutput = metrics:forward(cogState.basic)
+detailedReport = metrics:getDetailedReport()
+```
+
+**Tracked Metrics:**
+- **Attention:** Focus size, stability, STI inflation, attentional efficiency
+- **Memory:** Utilization, forgetting rate, consolidation rate
+- **Reasoning:** Inference count, success rate, reasoning depth
+- **Learning:** Knowledge acquisition rate, conceptual coherence, adaptation speed
+- **Economics:** STI/LTI balance, economic efficiency
+
+### 7. OpenCogWorkingMemory (`nn.OpenCogWorkingMemory`)
+
+Temporary storage for active cognitive processes including goals, episodes, and predictions.
+
+```lua
+workingMemory = nn.OpenCogWorkingMemory(capacity, itemSize)
+goalId = workingMemory:pushGoal("Learn about cats", embedding, priority)
+episodeId = workingMemory:addEpisode(perception, action, reward)
+prediction = workingMemory:addPrediction(futureState, confidence)
+```
+
+**Key Features:**
+- **Goal Stack:** Hierarchical goal management with priorities
+- **Episodic Buffer:** Recent experiences with rewards and context
+- **Context Tracking:** Dynamic context updates and history
+- **Prediction System:** Future state prediction with accuracy tracking
+
+### Advanced PLN Rules
+
+Extended probabilistic logic with sophisticated reasoning:
+
+```lua
+-- New inference rules
+similarityResult = pln:similarityRule(belief1_tv, belief2_tv)
+contrapositionResult = pln:contrapositionRule(implication_tv)
+hypotheticalResult = pln:hypotheticalReasoningRule(premise_tv, hypothesis_tv)
+intensionalResult = pln:intensionalReasoningRule(concept_tv, property_tv)
+
+-- Advanced inference chains
+result = pln:advancedInferenceChain(premises, {'deduction', 'similarity', 'intensional'})
+```
+
+### Enhanced OpenCogNetwork Methods
+
+```lua
+-- Goal-directed behavior
+goalId = cogNet:setGoal("Find food", goalEmbedding, priority)
+achievedGoal = cogNet:achieveCurrentGoal()
+
+-- Episodic learning
+episodeId = cogNet:addEpisode(perception, action, reward)
+
+-- Advanced reasoning
+result = cogNet:performAdvancedInference(premises, ruleSequence)
+
+-- Prediction and consolidation
+prediction = cogNet:predictNextState(currentState, horizon)
+cogNet:updateMemoryConsolidation()
+```
+
 ## References
 
 - Goertzel, B. et al. "OpenCog: A Software Framework for Integrative Artificial General Intelligence"

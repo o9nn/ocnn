@@ -226,6 +226,8 @@ require('nn.OpenCogAtomSpace')
 require('nn.OpenCogAttentionAllocation')
 require('nn.OpenCogPLN')
 require('nn.OpenCogNetwork')
+require('nn.OpenCogMetrics')
+require('nn.OpenCogWorkingMemory')
 
 
 return nn

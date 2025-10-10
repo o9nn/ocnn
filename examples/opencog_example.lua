@@ -187,6 +187,49 @@ print("  ✓ Perception-action integration")
 print("  ✓ Learning and memory consolidation")
 print("  ✓ Economic attention dynamics")
 
+-- Example 8: Advanced Cognitive Features
+print("\n--- Example 8: Advanced Cognitive Features ---")
+
+-- Goal-directed behavior
+print("Setting cognitive goals...")
+local goalEmbedding = torch.randn(config.atomSize)
+local goalId = cogNet:setGoal("Learn about cats", goalEmbedding, 0.9)
+print("Goal set with ID:", goalId)
+
+-- Advanced reasoning with multiple rules
+local advancedInference = cogNet:performAdvancedInference({catAtom, animalAtom}, {'deduction', 'similarity'})
+print("Advanced inference - Strength:", advancedInference[1], "Confidence:", advancedInference[2])
+
+-- Prediction and episodic learning
+local futureState = cogNet:predictNextState(perceptionInputs[1], 1)
+print("Predicted future state size:", futureState:size())
+
+-- Add episodic memories with rewards
+cogNet:addEpisode(perceptionInputs[1], actions[1], 0.8)  -- positive experience
+cogNet:addEpisode(perceptionInputs[2], actions[2], -0.2) -- negative experience
+print("Episodic memories added")
+
+-- Memory consolidation
+cogNet:updateMemoryConsolidation()
+print("Important memories consolidated to long-term storage")
+
+-- Example 9: Cognitive Metrics and Monitoring
+print("\n--- Example 9: Cognitive Metrics ---")
+
+-- Get comprehensive cognitive metrics
+local detailedState = cogNet:getCognitiveState()
+print("Cognitive metrics collected:")
+print("  - Attention efficiency:", string.format("%.3f", detailedState.metrics.attention.attentionalEfficiency))
+print("  - Memory utilization:", string.format("%.3f", detailedState.metrics.memory.utilization))
+print("  - Inference success rate:", string.format("%.3f", detailedState.metrics.reasoning.successRate))
+print("  - Knowledge acquisition rate:", detailedState.metrics.learning.knowledgeAcquisitionRate)
+
+-- Working memory status
+print("Working memory status:")
+print("  - Items in working memory:", detailedState.workingMemory.numItems)
+print("  - Current goal:", detailedState.workingMemory.currentGoal)
+print("  - Episodes stored:", detailedState.workingMemory.episodeCount)
+
 print("\nThis cognitive architecture can be integrated into:")
 print("  • Robotics systems for intelligent behavior")
 print("  • Natural language processing with reasoning")
@@ -194,5 +237,15 @@ print("  • Game AI with strategic planning")
 print("  • Knowledge graph learning and inference") 
 print("  • Multi-modal AI systems")
 print("  • Artificial General Intelligence research")
+print("  • Autonomous decision-making systems")
+print("  • Adaptive learning environments")
+
+print("\nNew features in this enhanced version:")
+print("  ✓ Advanced PLN inference rules (similarity, contraposition, etc.)")
+print("  ✓ Working memory with goal stack and episodic buffer")
+print("  ✓ Comprehensive cognitive metrics and monitoring") 
+print("  ✓ Prediction and memory consolidation")
+print("  ✓ Goal-directed reasoning and behavior")
+print("  ✓ Real-time attention and memory analysis")
 
 print("\nFor more examples, see: doc/opencog.md")

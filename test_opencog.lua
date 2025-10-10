@@ -162,5 +162,42 @@ for i, p in ipairs(params) do
 end
 print("Total parameter count:", totalParamCount)
 
+print("\n7. Testing advanced features...")
+
+-- Test goal setting
+local goalEmbedding = torch.randn(8)
+local goalId = cogNet:setGoal("Find food", goalEmbedding, 0.9)
+print("Set goal with ID:", goalId)
+
+-- Test episodic memory
+local episodeId = cogNet:addEpisode(perception[1], actions[1], 0.7)
+print("Added episode with ID:", episodeId)
+
+-- Test advanced inference
+local advancedResult = cogNet:performAdvancedInference({1, 2}, {'deduction', 'similarity'})
+print("Advanced inference result:", advancedResult[1], advancedResult[2])
+
+-- Test prediction
+local prediction = cogNet:predictNextState(perception[1], 1)
+print("Prediction generated, size:", prediction:size())
+
+-- Test memory consolidation
+cogNet:updateMemoryConsolidation()
+print("Memory consolidation completed")
+
+print("\n8. Testing cognitive metrics...")
+-- Test metrics
+local metricsModule = nn.OpenCogMetrics()
+local cogState = cogNet:getCognitiveState()
+local metricsOutput = metricsModule:forward(cogState.basic)
+print("Metrics computed:", metricsOutput:size())
+print("Detailed metrics available:", type(cogState.metrics))
+
+print("\n9. Testing working memory...")
+-- Test working memory
+local workingMemory = nn.OpenCogWorkingMemory(10, 8)
+local wmState = workingMemory:getWorkingMemoryState()
+print("Working memory state:", wmState.numItems, "items")
+
 print("\n✓ All OpenCog module tests completed successfully!")
-print("OpenCog neural network implementation is ready.")
+print("Enhanced OpenCog neural network implementation is ready.")
