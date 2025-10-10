@@ -220,5 +220,12 @@ require('nn.SparseJacobian')
 require('nn.hessian')
 require('nn.test')
 
+-- OpenCog cognitive architecture modules
+require('nn.OpenCogAtom')
+require('nn.OpenCogAtomSpace')
+require('nn.OpenCogAttentionAllocation')
+require('nn.OpenCogPLN')
+require('nn.OpenCogNetwork')
+
 
 return nn
