@@ -352,6 +352,11 @@ function InfernoMessagePassing:getStats()
       totalSubscribers = totalSubscribers + #channel.subscribers
    end
    
+   local remoteNodeCount = 0
+   for _ in pairs(self.remoteNodes) do
+      remoteNodeCount = remoteNodeCount + 1
+   end
+   
    return {
       channels = totalChannels,
       queuedMessages = totalMessages,
@@ -359,7 +364,7 @@ function InfernoMessagePassing:getStats()
       messagesSent = self.stats.messagesSent,
       messagesReceived = self.stats.messagesReceived,
       messagesDropped = self.stats.messagesDropped,
-      remoteNodes = table.getn(self.remoteNodes),
+      remoteNodes = remoteNodeCount,
       throughput = self.stats.messagesReceived / math.max(self.stats.messagesSent, 1)
    }
 end

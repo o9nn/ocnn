@@ -480,12 +480,17 @@ function InfernoFileSystem:getStats()
       end
    end
    
+   local mountCount = 0
+   for _ in pairs(self.mounts) do
+      mountCount = mountCount + 1
+   end
+   
    return {
       totalInodes = self.nextInode - 1,
       files = totalFiles,
       directories = totalDirs,
       openFiles = self.nextFD - 1,
-      mounts = table.getn(self.mounts),
+      mounts = mountCount,
       reads = self.stats.reads,
       writes = self.stats.writes,
       searches = self.stats.searches,

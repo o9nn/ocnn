@@ -27,6 +27,7 @@ function OpenCogInfernoOS:__init(config)
    self.osVersion = "OpenCog-Inferno-1.0"
    self.bootTime = os.time()
    self.clockFrequency = config.clockFrequency or 1000  -- Hz
+   self.verboseBoot = config.verboseBoot ~= false  -- Default to verbose
    
    -- Cognitive dimensions
    self.cognitiveResourceSize = config.cognitiveResourceSize or 32
@@ -35,8 +36,10 @@ function OpenCogInfernoOS:__init(config)
    self.actionSize = config.actionSize or 64
    
    -- Initialize Inferno kernel components
-   print("Booting OpenCog Inferno OS...")
-   print("Initializing kernel components...")
+   if self.verboseBoot then
+      print("Booting OpenCog Inferno OS...")
+      print("Initializing kernel components...")
+   end
    
    self.kernel = nn.InfernoKernel({
       maxProcesses = config.maxProcesses or 256,
@@ -73,7 +76,9 @@ function OpenCogInfernoOS:__init(config)
    })
    
    -- Initialize OpenCog cognitive components (integrated at kernel level)
-   print("Integrating OpenCog cognitive architecture...")
+   if self.verboseBoot then
+      print("Integrating OpenCog cognitive architecture...")
+   end
    
    self.atomSpace = nn.OpenCogAtomSpace(
       config.atomSpaceCapacity or 2048,
@@ -136,7 +141,9 @@ end
 
 function OpenCogInfernoOS:boot()
    -- Boot the AGI operating system
-   print("Booting AGI OS...")
+   if self.verboseBoot then
+      print("Booting AGI OS...")
+   end
    self.stats.bootCount = self.stats.bootCount + 1
    
    -- Start init process
@@ -148,13 +155,17 @@ function OpenCogInfernoOS:boot()
       end
    })
    
-   print("Init process started (PID: " .. initPID .. ")")
+   if self.verboseBoot then
+      print("Init process started (PID: " .. initPID .. ")")
+   end
    
    -- Spawn cognitive daemon processes
    self:_spawnCognitiveDaemons()
    
    -- Mount cognitive namespaces
-   print("Mounting cognitive namespaces...")
+   if self.verboseBoot then
+      print("Mounting cognitive namespaces...")
+   end
    self.filesystem:mkdir('/proc/self')
    self.filesystem:mkdir('/proc/cognition')
    
@@ -162,16 +173,20 @@ function OpenCogInfernoOS:boot()
    self:_initializeKnowledgeBase()
    
    self.isRunning = true
-   print("OpenCog Inferno OS boot complete!")
-   print("OS Version: " .. self.osVersion)
-   print("Uptime: 0 cycles")
+   if self.verboseBoot then
+      print("OpenCog Inferno OS boot complete!")
+      print("OS Version: " .. self.osVersion)
+      print("Uptime: 0 cycles")
+   end
    
    return true
 end
 
 function OpenCogInfernoOS:_spawnCognitiveDaemons()
    -- Spawn background cognitive processes
-   print("Spawning cognitive daemons...")
+   if self.verboseBoot then
+      print("Spawning cognitive daemons...")
+   end
    
    -- Attention allocation daemon
    local attentionPID = self.kernel:syscall(self.kernel.syscalls.SPAWN, {
@@ -206,13 +221,17 @@ function OpenCogInfernoOS:_spawnCognitiveDaemons()
    })
    table.insert(self.bootProcesses, reasoningPID)
    
-   print("Cognitive daemons spawned: " .. #self.bootProcesses .. " processes")
+   if self.verboseBoot then
+      print("Cognitive daemons spawned: " .. #self.bootProcesses .. " processes")
+   end
    self.stats.processesSpawned = self.stats.processesSpawned + #self.bootProcesses
 end
 
 function OpenCogInfernoOS:_initializeKnowledgeBase()
    -- Initialize basic knowledge in the OS
-   print("Initializing knowledge base...")
+   if self.verboseBoot then
+      print("Initializing knowledge base...")
+   end
    
    -- Create base concepts in filesystem
    local selfConcept = torch.randn(self.cognitiveResourceSize)
@@ -224,26 +243,38 @@ function OpenCogInfernoOS:_initializeKnowledgeBase()
    -- Add to AtomSpace
    self.atomSpace:addAtom('ConceptNode', selfConcept, 100, 1.0, 1.0, 1.0)
    
-   print("Knowledge base initialized")
+   if self.verboseBoot then
+      print("Knowledge base initialized")
+   end
 end
 
 function OpenCogInfernoOS:shutdown()
    -- Graceful shutdown
-   print("Shutting down OpenCog Inferno OS...")
+   if self.verboseBoot then
+      print("Shutting down OpenCog Inferno OS...")
+   end
    
    -- Stop all processes
    self.isRunning = false
    
    -- Consolidate memory before shutdown
-   print("Consolidating memory...")
+   if self.verboseBoot then
+      print("Consolidating memory...")
+   end
    local consolidated = self.memory:consolidate()
-   print("Consolidated " .. consolidated .. " memory blocks")
+   if self.verboseBoot then
+      print("Consolidated " .. consolidated .. " memory blocks")
+   end
    
    -- Sync filesystem
-   print("Syncing cognitive filesystem...")
+   if self.verboseBoot then
+      print("Syncing cognitive filesystem...")
+   end
    
-   print("OpenCog Inferno OS shutdown complete")
-   print("Uptime: " .. (os.time() - self.bootTime) .. " seconds")
+   if self.verboseBoot then
+      print("OpenCog Inferno OS shutdown complete")
+      print("Uptime: " .. (os.time() - self.bootTime) .. " seconds")
+   end
    
    return true
 end
