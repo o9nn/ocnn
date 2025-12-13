@@ -227,5 +227,14 @@ require('nn.OpenCogAttentionAllocation')
 require('nn.OpenCogPLN')
 require('nn.OpenCogNetwork')
 
+-- Inferno kernel-based AGI operating system
+require('nn.InfernoKernel')
+require('nn.InfernoProcessScheduler')
+require('nn.InfernoMemoryManager')
+require('nn.InfernoMessagePassing')
+require('nn.InfernoFileSystem')
+require('nn.InfernoDeviceDriver')
+require('nn.OpenCogInfernoOS')
+
 
 return nn
