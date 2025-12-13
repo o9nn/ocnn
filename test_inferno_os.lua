@@ -1,5 +1,23 @@
 --[[
 Test suite for OpenCog Inferno AGI Operating System
+
+This test suite validates the core functionality of the Inferno kernel-based
+AGI operating system including:
+
+1. InfernoKernel - Core kernel syscalls and cognitive operations
+2. InfernoProcessScheduler - Process scheduling and management
+3. InfernoMemoryManager - Hierarchical memory allocation and consolidation
+4. InfernoMessagePassing - Inter-process communication and channels
+5. InfernoFileSystem - Knowledge filesystem operations
+6. InfernoDeviceDriver - Device I/O for perception and action
+7. OpenCogInfernoOS - Complete integrated AGI operating system
+8. Integration - End-to-end cognitive cycles with learning
+
+To run the tests:
+  th -lnn -e "dofile('test_inferno_os.lua')"
+
+Or run specific tests:
+  th -lnn -e "nn.testInferno = require('test_inferno_os'); nn.testInferno.testInfernoKernel()"
 ]]
 
 require('nn')

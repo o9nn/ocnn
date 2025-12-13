@@ -197,13 +197,20 @@ function InfernoDeviceDriver:write(deviceName, data)
    
    -- Default: write to buffer
    if torch.isTensor(data) then
-      local writeSize = math.min(data:size(1), self.deviceBufferSize - device.writePos + 1)
-      device.buffer[{{device.writePos, device.writePos + writeSize - 1}}]:copy(data[{{1, writeSize}}])
-      device.writePos = device.writePos + writeSize
-      if device.writePos > self.deviceBufferSize then
-         device.writePos = 1
+      local availableSpace = self.deviceBufferSize - device.writePos + 1
+      local writeSize = math.min(data:size(1), availableSpace)
+      
+      if writeSize > 0 then
+         device.buffer[{{device.writePos, device.writePos + writeSize - 1}}]:copy(data[{{1, writeSize}}])
+         device.writePos = device.writePos + writeSize
+         
+         -- Wrap around if at end of buffer
+         if device.writePos > self.deviceBufferSize then
+            device.writePos = 1
+         end
+         
+         self.stats.bytesWritten = self.stats.bytesWritten + writeSize
       end
-      self.stats.bytesWritten = self.stats.bytesWritten + data:nElement()
    end
    
    return true
