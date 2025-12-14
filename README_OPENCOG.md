@@ -1,6 +1,6 @@
 # OpenCog Neural Network Implementation
 
-This repository now includes a complete implementation of the OpenCog cognitive architecture as neural network modules for the Torch nn package.
+This repository now includes a complete implementation of the OpenCog cognitive architecture as neural network modules for the Torch nn package, plus a revolutionary **OpenCog Inferno AGI Operating System** where cognitive processing is a fundamental kernel service.
 
 ## What is OpenCog?
 
@@ -146,27 +146,321 @@ This OpenCog implementation enables:
 - Memory consolidation and forgetting
 - Goal-directed behavior emergence
 
-## Architecture Overview
+## OpenCog Inferno AGI Operating System
+
+### Revolutionary Approach
+
+Instead of layering cognitive architectures on top of existing operating systems, **OpenCog Inferno OS** makes cognitive processing a fundamental kernel service where thinking, reasoning, and intelligence emerge from the operating system itself.
+
+### Key Innovations
+
+🧠 **Cognition as Kernel Service**
+- Thinking, reasoning, and memory are syscalls like `read()` and `write()`
+- Thoughts are schedulable processes with priorities and resources
+- Intelligence emerges from the OS, not applications running on it
+
+🔄 **Distributed by Design**
+- Cognitive processes can migrate between nodes seamlessly
+- Message passing enables distributed AGI across multiple machines
+- Shared cognitive memory with automatic consolidation
+
+💾 **Knowledge as Filesystem**
+- Concepts, memories, and procedures are files/directories
+- Standard filesystem operations: open, read, write, search
+- Hierarchical organization: `/concepts`, `/memories`, `/goals`
+
+⚡ **Real-Time Cognition**
+- Process scheduler ensures critical thoughts execute first
+- Hierarchical memory with automatic importance-based eviction
+- Device drivers for perception and action I/O
+
+🎯 **Fully Differentiable**
+- Entire OS is a neural network module
+- Backpropagation through kernel, scheduler, memory, and filesystem
+- End-to-end learning of cognitive operations
+
+### Architecture Overview
 
 ```
-Perception → AtomSpace → Attention → PLN → Action
-     ↑           ↓          ↓        ↓       ↓
-   Input    Knowledge    Focus   Reasoning  Output
-            Storage    Management           
-                         ↓
-                   Memory & Learning
+┌─────────────────────────────────────────────────────────────┐
+│                   OpenCog Inferno AGI OS                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Inferno Kernel (Syscalls)               │   │
+│  │  THINK | REASON | REMEMBER | ATTEND | COMMUNICATE   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│           │              │              │                    │
+│  ┌────────▼────┐  ┌─────▼─────┐  ┌────▼─────────┐        │
+│  │  Process    │  │  Memory    │  │   Message    │        │
+│  │  Scheduler  │  │  Manager   │  │   Passing    │        │
+│  │             │  │            │  │              │        │
+│  │ • Priority  │  │ • Sensory  │  │ • Channels   │        │
+│  │ • Preempt   │  │ • Working  │  │ • Broadcast  │        │
+│  │ • Migrate   │  │ • Episodic │  │ • Sync       │        │
+│  │ • Deadlock  │  │ • Semantic │  │ • Distributed│        │
+│  └─────────────┘  └────────────┘  └──────────────┘        │
+│           │              │              │                    │
+│  ┌────────▼──────────────▼──────────────▼─────────────┐   │
+│  │           Cognitive Filesystem                       │   │
+│  │  /concepts  /memories  /goals  /procedures          │   │
+│  └──────────────────────────────────────────────────────┘   │
+│           │                                                  │
+│  ┌────────▼──────────────────────────────────────────┐    │
+│  │         Device Drivers (I/O)                       │    │
+│  │  /dev/eyes  /dev/motor  /dev/attention            │    │
+│  └────────────────────────────────────────────────────┘    │
+│           │                                                  │
+│  ┌────────▼──────────────────────────────────────────┐    │
+│  │    OpenCog Components (AtomSpace, PLN, Attention) │    │
+│  └────────────────────────────────────────────────────┘    │
+│                                                               │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Quick Start
+
+```lua
+require('nn')
+
+-- Boot the AGI operating system
+local agiOS = nn.OpenCogInfernoOS({
+   maxProcesses = 256,
+   cognitiveResourceSize = 32,
+   perceptionSize = 128,
+   actionSize = 64,
+   schedulingPolicy = 'priority'
+})
+
+-- Make system calls for cognitive operations
+local thought = agiOS:syscall('THINK', {input = perception})
+local conclusion = agiOS:syscall('REASON', {premises = premises})
+local pid = agiOS:syscall('SPAWN', {name = 'reasoning-process'})
+
+-- Run complete cognitive cycle
+local perception = torch.randn(batch, 128)
+local actions = agiOS:forward(perception)
+
+-- Train the entire OS
+local criterion = nn.MSECriterion()
+local loss = criterion:forward(actions, target)
+local gradOutput = criterion:backward(actions, target)
+agiOS:backward(perception, gradOutput)
+```
+
+### Core Components
+
+#### 1. InfernoKernel
+
+The heart of the OS. Provides syscalls for cognitive operations:
+
+```lua
+-- System calls
+THINK      -- Generate thought from input
+REASON     -- Apply reasoning rules
+REMEMBER   -- Allocate kernel memory
+FORGET     -- Free kernel memory
+ATTEND     -- Focus attention
+COMMUNICATE -- Send message via channel
+SPAWN      -- Create cognitive process
+WAIT       -- Wait for process
+INTROSPECT -- Examine kernel state
+```
+
+#### 2. InfernoProcessScheduler
+
+Schedules concurrent cognitive processes:
+
+- **Priority-based scheduling**: Critical thoughts execute first
+- **Time-slicing**: Fair allocation of cognitive cycles
+- **Process migration**: Move processes between nodes
+- **Deadlock detection**: Prevent circular waits
+- **Load balancing**: Distribute cognition across nodes
+
+#### 3. InfernoMemoryManager
+
+Hierarchical cognitive memory:
+
+- **Sensory buffer**: ~100ms perception window
+- **Working memory**: Active thoughts and reasoning
+- **Episodic memory**: Recent experiences and events
+- **Semantic memory**: Long-term general knowledge
+- **Procedural memory**: Skills and learned procedures
+
+Features:
+- Automatic importance-based eviction
+- Memory consolidation during idle cycles
+- Virtual memory with page table
+- Copy-on-write for efficiency
+
+#### 4. InfernoMessagePassing
+
+Inter-process communication:
+
+- **Named channels**: Semantic routing of messages
+- **Synchronous/asynchronous**: Blocking and non-blocking
+- **Pub/sub**: Topic-based subscriptions
+- **Distributed**: Messages across network nodes
+- **Typed messages**: THOUGHT, ATTENTION, MEMORY, CONTROL
+
+#### 5. InfernoFileSystem
+
+Knowledge as a filesystem:
+
+```
+/concepts         - Semantic concepts
+/relations        - Relationships between concepts  
+/memories
+  /episodic      - Episodic memories
+  /semantic      - Semantic memories
+  /procedural    - Procedural memories
+/goals           - Active goals and intentions
+/perceptions     - Current sensory state
+/attention       - Attention focus
+/reasoning       - Reasoning results
+/actions         - Action plans
+```
+
+Operations: `mkdir`, `create`, `open`, `read`, `write`, `close`, `remove`, `list`, `search`
+
+#### 6. InfernoDeviceDriver
+
+Perception and action as device I/O:
+
+```
+/dev/eyes       - Visual perception input
+/dev/ears       - Auditory perception input
+/dev/touch      - Tactile perception input
+/dev/motor      - Motor control output
+/dev/speech     - Speech generation output
+/dev/attention  - Attention focus device
+/dev/memory     - Memory device interface
+/dev/reasoning  - Reasoning engine device
+```
+
+Operations: `read`, `write`, `ioctl`, interrupts
+
+### Example: Complete Cognitive Cycle
+
+```lua
+-- Boot AGI OS
+local agiOS = nn.OpenCogInfernoOS(config)
+
+-- Spawn cognitive processes
+local attentionPID = agiOS:syscall('SPAWN', {
+   name = 'attention-allocation',
+   priority = 80,
+   entryPoint = attentionFunction
+})
+
+local reasoningPID = agiOS:syscall('SPAWN', {
+   name = 'background-reasoning',
+   priority = 50,
+   entryPoint = reasoningFunction
+})
+
+-- Create knowledge in filesystem
+local concept = torch.randn(32)
+agiOS.filesystem:create('/concepts/cat', concept, {
+   importance = 0.9,
+   truthValue = {strength = 0.95, confidence = 0.85}
+})
+
+-- Allocate memory hierarchically
+local episodeData = torch.randn(32)
+local addr = agiOS.memory:allocate('episodic', episodeData, {
+   importance = 0.7,
+   timestamp = os.time()
+})
+
+-- Message passing between processes
+local channel = agiOS.messaging:createChannel('thought-stream')
+agiOS.messaging:send(channel, thoughtMessage)
+
+-- Device I/O for perception and action
+agiOS.devices:write('eyes', visualInput)
+local motorOutput = agiOS.devices:read('motor')
+
+-- Complete perception-action loop
+for i = 1, 1000 do
+   local perception = getPerception()
+   local actions = agiOS:forward(perception)
+   executeActions(actions)
+   
+   -- Learn from feedback
+   if i % 10 == 0 then
+      local loss = computeLoss(actions, target)
+      local gradOutput = criterion:backward(actions, target)
+      agiOS:backward(perception, gradOutput)
+      updateParameters()
+   end
+   
+   -- Periodic maintenance
+   if i % 100 == 0 then
+      agiOS.memory:consolidate()  -- Move to long-term memory
+      agiOS.scheduler:balanceLoad()  -- Balance across nodes
+   end
+end
+
+-- System monitoring
+local status = agiOS:getSystemStatus()
+print("Uptime: " .. status.uptime .. " seconds")
+print("Thoughts: " .. status.stats.totalThoughts)
+print("Memory: " .. status.memory.workingUtilization * 100 .. "%")
+print("Processes: " .. status.scheduler.totalProcesses)
+```
+
+### Applications
+
+🤖 **Autonomous Robotics**
+- Real-time cognitive processing for navigation and manipulation
+- Distributed cognition across robot swarms
+- Learning from environmental interaction
+
+🌐 **Distributed AGI**
+- Scale intelligence across multiple machines
+- Process migration for load balancing
+- Fault-tolerant cognitive systems
+
+🧪 **AGI Research**
+- Study emergence of intelligence from OS primitives
+- Experiment with cognitive architectures
+- Benchmark different scheduling and memory policies
+
+🎮 **Intelligent Agents**
+- NPCs with human-like cognition
+- Strategic planning and reasoning
+- Emotional and social intelligence
+
+💼 **Enterprise AI**
+- Knowledge management systems
+- Decision support with reasoning
+- Explainable AI with symbolic grounding
 
 ## Files Added
 
+### OpenCog Cognitive Architecture
 - `OpenCogAtom.lua` - Basic knowledge units
 - `OpenCogAtomSpace.lua` - Hypergraph knowledge storage
 - `OpenCogAttentionAllocation.lua` - Economic attention dynamics
 - `OpenCogPLN.lua` - Probabilistic logic networks
 - `OpenCogNetwork.lua` - Complete cognitive architecture
+
+### Inferno Kernel-Based AGI OS
+- `InfernoKernel.lua` - Core kernel with cognitive operations as syscalls
+- `InfernoProcessScheduler.lua` - Cognitive process scheduler for distributed AGI
+- `InfernoMemoryManager.lua` - Hierarchical memory management system
+- `InfernoMessagePassing.lua` - Inter-process communication for distributed cognition
+- `InfernoFileSystem.lua` - Knowledge representation as filesystem
+- `InfernoDeviceDriver.lua` - Device drivers for cognitive sensors/actuators
+- `OpenCogInfernoOS.lua` - Main AGI operating system integration
+
+### Documentation and Examples
 - `doc/opencog.md` - Detailed documentation
-- `examples/opencog_example.lua` - Usage examples
+- `examples/opencog_example.lua` - OpenCog usage examples
+- `examples/inferno_os_example.lua` - Inferno OS demonstration
 - `test_opencog.lua` - Test suite
+- `test_inferno_os.lua` - Inferno OS test suite
 
 ## Integration with Existing Code
 
