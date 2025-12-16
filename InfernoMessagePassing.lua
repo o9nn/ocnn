@@ -35,6 +35,18 @@ function InfernoMessagePassing:__init(config)
    self.localNode = config.nodeName or 'node-0'
    self.remoteNodes = {}  -- Maps node name to connection info
    
+   -- Network layer for distributed messaging
+   self.networkEnabled = config.networkEnabled or false
+   self.networkPort = config.networkPort or 9999
+   self.messageAcks = {}  -- Pending acknowledgments for reliable delivery
+   self.nextMessageID = 1
+   
+   -- Reliable delivery support
+   self.reliableDelivery = config.reliableDelivery ~= false  -- Default: enabled
+   self.maxRetries = config.maxRetries or 3
+   self.ackTimeout = config.ackTimeout or 1000  -- milliseconds
+   self.networkReliability = config.networkReliability or 0.95  -- 95% success rate by default
+   
    -- Message types
    self.messageTypes = {
       THOUGHT = 1,       -- Cognitive thought transfer
@@ -43,8 +55,16 @@ function InfernoMessagePassing:__init(config)
       CONTROL = 4,       -- Control messages
       DATA = 5,          -- Generic data
       SYNC = 6,          -- Synchronization barrier
-      BROADCAST = 7      -- Broadcast to all
+      BROADCAST = 7,     -- Broadcast to all
+      ACK = 8,           -- Acknowledgment
+      RPC_REQUEST = 9,   -- Remote procedure call request
+      RPC_RESPONSE = 10  -- Remote procedure call response
    }
+   
+   -- RPC system
+   self.rpcHandlers = {}  -- Registered RPC handlers
+   self.pendingRPCs = {}  -- Pending RPC calls
+   self.nextRPCID = 1
    
    -- Statistics
    self.stats = {
@@ -53,7 +73,10 @@ function InfernoMessagePassing:__init(config)
       messagesDropped = 0,
       channelsCreated = 0,
       broadcastsSent = 0,
-      remoteMessages = 0
+      remoteMessages = 0,
+      acksReceived = 0,
+      rpcCalls = 0,
+      networkErrors = 0
    }
    
    self:reset()
@@ -64,6 +87,11 @@ function InfernoMessagePassing:reset()
    self.messageQueue = {}
    self.subscriptions = {}
    self.nextChannelID = 1
+   self.messageAcks = {}
+   self.nextMessageID = 1
+   self.rpcHandlers = {}
+   self.pendingRPCs = {}
+   self.nextRPCID = 1
    
    return self
 end
@@ -257,16 +285,34 @@ function InfernoMessagePassing:connectRemoteNode(nodeName, connectionInfo)
 end
 
 function InfernoMessagePassing:sendRemote(nodeName, channelName, message)
-   -- Send message to channel on remote node
+   -- Send message to channel on remote node (with network layer simulation)
    local node = self.remoteNodes[nodeName]
    if not node or not node.connected then
+      self.stats.networkErrors = self.stats.networkErrors + 1
       return false, "Node not connected"
    end
    
    self.stats.remoteMessages = self.stats.remoteMessages + 1
    
-   -- In real implementation, would serialize and send over network
-   -- For now, just track the attempt
+   -- In real implementation, would:
+   -- 1. Serialize message (e.g., to JSON or MessagePack)
+   -- 2. Create network packet with headers
+   -- 3. Send over TCP/UDP socket
+   -- 4. Handle network errors and retries
+   
+   -- For simulation: just track that message was sent
+   if self.networkEnabled then
+      -- Simulate network delay and potential failures
+      local networkSuccess = math.random() < self.networkReliability
+      
+      if networkSuccess then
+         -- Message delivered successfully
+         return true
+      else
+         self.stats.networkErrors = self.stats.networkErrors + 1
+         return false, "Network error"
+      end
+   end
    
    return true
 end
@@ -357,6 +403,13 @@ function InfernoMessagePassing:getStats()
       remoteNodeCount = remoteNodeCount + 1
    end
    
+   local pendingAcks = 0
+   for _, ack in pairs(self.messageAcks) do
+      if not ack.acked then
+         pendingAcks = pendingAcks + 1
+      end
+   end
+   
    return {
       channels = totalChannels,
       queuedMessages = totalMessages,
@@ -365,17 +418,32 @@ function InfernoMessagePassing:getStats()
       messagesReceived = self.stats.messagesReceived,
       messagesDropped = self.stats.messagesDropped,
       remoteNodes = remoteNodeCount,
-      throughput = self.stats.messagesReceived / math.max(self.stats.messagesSent, 1)
+      throughput = self.stats.messagesReceived / math.max(self.stats.messagesSent, 1),
+      pendingAcks = pendingAcks,
+      acksReceived = self.stats.acksReceived,
+      rpcCalls = self.stats.rpcCalls,
+      networkErrors = self.stats.networkErrors,
+      pendingRPCs = self:_countPendingRPCs()
    }
+end
+
+function InfernoMessagePassing:_countPendingRPCs()
+   local count = 0
+   for _ in pairs(self.pendingRPCs) do
+      count = count + 1
+   end
+   return count
 end
 
 function InfernoMessagePassing:__tostring()
    local stats = self:getStats()
-   return string.format('InfernoMessagePassing Channels:%d Queued:%d Sent:%d Recv:%d',
+   return string.format('InfernoMessagePassing Channels:%d Queued:%d Sent:%d Recv:%d RPCs:%d Errors:%d',
       stats.channels,
       stats.queuedMessages,
       stats.messagesSent,
-      stats.messagesReceived)
+      stats.messagesReceived,
+      stats.rpcCalls,
+      stats.networkErrors)
 end
 
 return InfernoMessagePassing

@@ -66,8 +66,24 @@ function InfernoMemoryManager:__init(config)
       workingMemoryAccess = 0,
       episodicAccess = 0,
       semanticAccess = 0,
-      proceduralAccess = 0
+      proceduralAccess = 0,
+      sleepConsolidations = 0,
+      compressions = 0,
+      copyOnWrites = 0
    }
+   
+   -- Memory consolidation state
+   self.sleepMode = false
+   self.consolidationBatch = config.consolidationBatch or 10
+   
+   -- Copy-on-write support
+   self.cowPages = {}  -- Tracks pages with COW enabled
+   self.sharedPages = {}  -- Reference count for shared pages
+   
+   -- Memory compression (simplified)
+   self.compressionEnabled = config.compressionEnabled or false
+   self.compressionThreshold = config.compressionThreshold or 0.9  -- Compress when 90% full
+   self.hebbianStrengtheningRate = config.hebbianStrengtheningRate or 1.05  -- Strengthen by 5%
    
    self:reset()
 end
@@ -116,6 +132,8 @@ function InfernoMemoryManager:reset()
    
    self.accessHistory = {}
    self.consolidationQueue = {}
+   self.cowPages = {}
+   self.sharedPages = {}
    
    return self
 end
@@ -229,39 +247,6 @@ function InfernoMemoryManager:read(virtualAddr)
    return data
 end
 
-function InfernoMemoryManager:write(virtualAddr, data)
-   -- Write to virtual memory address
-   local page = self.pageTable[virtualAddr]
-   
-   if not page then
-      self.stats.pageMisses = self.stats.pageMisses + 1
-      return false
-   end
-   
-   self.stats.pageHits = self.stats.pageHits + 1
-   
-   -- Get physical memory
-   local memory = self:_getMemory(page.memoryType)
-   local dataSize = math.min(data:nElement(), self.memoryBlockSize)
-   memory[page.physicalAddr]:narrow(1, 1, dataSize):copy(data:narrow(1, 1, dataSize))
-   
-   -- Update metadata
-   local metadata = self:_getMetadata(page.memoryType, page.physicalAddr)
-   if metadata then
-      metadata.accessCount = metadata.accessCount + 1
-      metadata.lastModified = os.time()
-   end
-   
-   -- Track access pattern
-   table.insert(self.accessHistory, {
-      virtualAddr = virtualAddr,
-      timestamp = os.time(),
-      type = 'write'
-   })
-   
-   return true
-end
-
 function InfernoMemoryManager:free(virtualAddr)
    -- Free virtual memory
    local page = self.pageTable[virtualAddr]
@@ -295,16 +280,34 @@ function InfernoMemoryManager:consolidate()
    self.stats.consolidations = self.stats.consolidations + 1
    
    local consolidated = 0
+   local batch = 0
    
    -- Examine working memory for consolidation candidates
    for physicalAddr, metadata in pairs(self.workingMetadata) do
-      if metadata.importance > 0.7 or metadata.accessCount > 10 then
+      if batch >= self.consolidationBatch and not self.sleepMode then
+         break  -- Limit consolidation per cycle unless in sleep mode
+      end
+      
+      -- Consolidation criteria: high importance, frequent access, or generality
+      local shouldConsolidate = false
+      
+      if metadata.importance > 0.7 then
+         shouldConsolidate = true
+      elseif metadata.accessCount > 10 then
+         shouldConsolidate = true
+      elseif metadata.emotional and metadata.emotional > 0.8 then
+         shouldConsolidate = true  -- Emotional memories consolidate faster
+      end
+      
+      if shouldConsolidate then
          -- Consolidate to episodic or semantic memory
          local data = self.workingMemory[physicalAddr]:clone()
          
          local targetType = 'episodic'
          if metadata.generality and metadata.generality > 0.8 then
             targetType = 'semantic'  -- Abstract, general knowledge
+         elseif metadata.procedural then
+            targetType = 'procedural'  -- Skills and procedures
          end
          
          -- Allocate in long-term memory
@@ -321,11 +324,166 @@ function InfernoMemoryManager:consolidate()
             end
             
             consolidated = consolidated + 1
+            batch = batch + 1
          end
       end
    end
    
    return consolidated
+end
+
+function InfernoMemoryManager:sleepConsolidate(duration)
+   -- Deep consolidation during sleep/idle periods
+   -- This allows more aggressive memory reorganization
+   self.sleepMode = true
+   self.stats.sleepConsolidations = self.stats.sleepConsolidations + 1
+   
+   local totalConsolidated = 0
+   
+   -- Multiple consolidation passes during sleep
+   local passes = math.floor(duration / 10) or 5
+   
+   for i = 1, passes do
+      local consolidated = self:consolidate()
+      totalConsolidated = totalConsolidated + consolidated
+      
+      -- Compress memories during sleep
+      if self.compressionEnabled then
+         self:compressMemories()
+      end
+      
+      -- Strengthen important connections
+      self:strengthenImportantMemories()
+   end
+   
+   self.sleepMode = false
+   
+   return totalConsolidated
+end
+
+function InfernoMemoryManager:strengthenImportantMemories()
+   -- Strengthen frequently accessed or important memories
+   -- This simulates memory replay during sleep
+   
+   for physicalAddr, metadata in pairs(self.episodicMetadata) do
+      if metadata.accessCount > 5 or metadata.importance > 0.8 then
+         -- Increase importance slightly (Hebbian strengthening)
+         metadata.importance = math.min(1.0, metadata.importance * self.hebbianStrengtheningRate)
+      end
+   end
+   
+   for physicalAddr, metadata in pairs(self.semanticMetadata) do
+      if metadata.accessCount > 10 or metadata.importance > 0.9 then
+         metadata.importance = math.min(1.0, metadata.importance * (self.hebbianStrengtheningRate * 0.4 + 0.6))  -- More conservative for semantic
+      end
+   end
+   
+   return true
+end
+
+function InfernoMemoryManager:compressMemories()
+   -- Compress memory blocks to save space (simplified implementation)
+   self.stats.compressions = self.stats.compressions + 1
+   
+   -- Check if compression is needed
+   local workingUtil = (self.workingMemorySize - #self.workingFreeList) / self.workingMemorySize
+   local episodicUtil = (self.episodicMemorySize - #self.episodicFreeList) / self.episodicMemorySize
+   
+   if workingUtil < self.compressionThreshold and episodicUtil < self.compressionThreshold then
+      return 0  -- No compression needed
+   end
+   
+   -- Simplified: mark low-importance memories for compression
+   -- In real implementation, would use actual compression algorithms
+   local compressed = 0
+   
+   for physicalAddr, metadata in pairs(self.episodicMetadata) do
+      if metadata.importance < 0.3 and not metadata.compressed then
+         metadata.compressed = true
+         metadata.compressionRatio = 0.5  -- Assume 50% compression
+         compressed = compressed + 1
+      end
+   end
+   
+   return compressed
+end
+
+function InfernoMemoryManager:enableCopyOnWrite(virtualAddr)
+   -- Enable copy-on-write for shared memory pages
+   local page = self.pageTable[virtualAddr]
+   if not page then return false end
+   
+   -- Mark page as COW
+   self.cowPages[virtualAddr] = true
+   
+   -- Track sharing
+   if not self.sharedPages[page.physicalAddr] then
+      self.sharedPages[page.physicalAddr] = {
+         refCount = 1,
+         virtualAddresses = {virtualAddr}
+      }
+   end
+   
+   return true
+end
+
+function InfernoMemoryManager:write(virtualAddr, data)
+   -- Write to virtual memory address (with COW support)
+   local page = self.pageTable[virtualAddr]
+   
+   if not page then
+      self.stats.pageMisses = self.stats.pageMisses + 1
+      return false
+   end
+   
+   self.stats.pageHits = self.stats.pageHits + 1
+   
+   -- Check if this is a COW page
+   if self.cowPages[virtualAddr] then
+      -- Copy page before writing
+      local sharedInfo = self.sharedPages[page.physicalAddr]
+      
+      if sharedInfo and sharedInfo.refCount > 1 then
+         -- Create private copy
+         local oldData = self:_getMemory(page.memoryType)[page.physicalAddr]:clone()
+         
+         -- Allocate new page
+         local newAddr = self:allocate(page.memoryType, oldData, page.metadata)
+         
+         if newAddr then
+            -- Update page table to point to new physical page
+            local newPage = self.pageTable[newAddr]
+            page.physicalAddr = newPage.physicalAddr
+            
+            -- Update shared page tracking
+            sharedInfo.refCount = sharedInfo.refCount - 1
+            self.cowPages[virtualAddr] = nil
+            
+            self.stats.copyOnWrites = self.stats.copyOnWrites + 1
+         end
+      end
+   end
+   
+   -- Get physical memory
+   local memory = self:_getMemory(page.memoryType)
+   local dataSize = math.min(data:nElement(), self.memoryBlockSize)
+   memory[page.physicalAddr]:narrow(1, 1, dataSize):copy(data:narrow(1, 1, dataSize))
+   
+   -- Update metadata
+   local metadata = self:_getMetadata(page.memoryType, page.physicalAddr)
+   if metadata then
+      metadata.accessCount = metadata.accessCount + 1
+      metadata.lastModified = os.time()
+   end
+   
+   -- Track access pattern
+   table.insert(self.accessHistory, {
+      virtualAddr = virtualAddr,
+      timestamp = os.time(),
+      type = 'write'
+   })
+   
+   return true
 end
 
 function InfernoMemoryManager:_evict(memoryType)

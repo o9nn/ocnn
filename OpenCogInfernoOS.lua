@@ -392,6 +392,13 @@ function OpenCogInfernoOS:parameters()
    local params = {}
    local gradParams = {}
    
+   -- Kernel parameters (NEW: kernel is now learnable!)
+   local p0, gp0 = self.kernel:parameters()
+   for i, p in ipairs(p0) do
+      table.insert(params, p)
+      table.insert(gradParams, gp0[i])
+   end
+   
    -- Perception encoder parameters
    local p1, gp1 = self.perceptionEncoder:parameters()
    for i, p in ipairs(p1) do
