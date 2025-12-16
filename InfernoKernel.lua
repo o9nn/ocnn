@@ -82,6 +82,9 @@ function InfernoKernel:__init(config)
    self.nodeID = config.nodeID or 'node-0'
    self.clusterNodes = {}  -- Other nodes in the AGI cluster
    
+   -- Cognitive parameters
+   self.contextModulationStrength = config.contextModulationStrength or 0.1
+   
    -- Kernel statistics
    self.stats = {
       syscallCount = 0,
@@ -200,7 +203,7 @@ function InfernoKernel:_think(input, context)
    
    -- Apply context if provided
    if context and torch.isTensor(context) then
-      thoughtVector = thoughtVector + context * 0.1  -- Context modulation
+      thoughtVector = thoughtVector + context * self.contextModulationStrength
    end
    
    return thoughtVector

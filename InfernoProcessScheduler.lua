@@ -57,6 +57,7 @@ function InfernoProcessScheduler:__init(config)
    -- Migration support
    self.migrationThreshold = config.migrationThreshold or 0.8  -- Load threshold for migration
    self.migrationCooldown = {}  -- Prevent frequent migration
+   self.maxClusterNodes = config.maxClusterNodes or 10  -- Maximum nodes in cluster
    
    -- Deadlock detection
    self.resourceWaitGraph = {} -- For detecting circular waits
@@ -482,7 +483,7 @@ function InfernoProcessScheduler:autoMigrate()
       -- Don't migrate real-time or recently migrated processes
       if not p.realtime and not self.migrationCooldown[p.pid] then
          -- Find target node (simplified - would query cluster in real system)
-         local targetNode = 'node-' .. ((math.random(10) % 5) + 1)
+         local targetNode = 'node-' .. ((math.random(100) % self.maxClusterNodes) + 1)
          
          if targetNode ~= self.localNodeID then
             -- Mark for migration

@@ -45,6 +45,7 @@ function InfernoMessagePassing:__init(config)
    self.reliableDelivery = config.reliableDelivery ~= false  -- Default: enabled
    self.maxRetries = config.maxRetries or 3
    self.ackTimeout = config.ackTimeout or 1000  -- milliseconds
+   self.networkReliability = config.networkReliability or 0.95  -- 95% success rate by default
    
    -- Message types
    self.messageTypes = {
@@ -302,7 +303,7 @@ function InfernoMessagePassing:sendRemote(nodeName, channelName, message)
    -- For simulation: just track that message was sent
    if self.networkEnabled then
       -- Simulate network delay and potential failures
-      local networkSuccess = math.random() > 0.05  -- 95% success rate
+      local networkSuccess = math.random() < self.networkReliability
       
       if networkSuccess then
          -- Message delivered successfully

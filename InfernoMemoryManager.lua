@@ -83,6 +83,7 @@ function InfernoMemoryManager:__init(config)
    -- Memory compression (simplified)
    self.compressionEnabled = config.compressionEnabled or false
    self.compressionThreshold = config.compressionThreshold or 0.9  -- Compress when 90% full
+   self.hebbianStrengtheningRate = config.hebbianStrengtheningRate or 1.05  -- Strengthen by 5%
    
    self:reset()
 end
@@ -367,13 +368,13 @@ function InfernoMemoryManager:strengthenImportantMemories()
    for physicalAddr, metadata in pairs(self.episodicMetadata) do
       if metadata.accessCount > 5 or metadata.importance > 0.8 then
          -- Increase importance slightly (Hebbian strengthening)
-         metadata.importance = math.min(1.0, metadata.importance * 1.05)
+         metadata.importance = math.min(1.0, metadata.importance * self.hebbianStrengtheningRate)
       end
    end
    
    for physicalAddr, metadata in pairs(self.semanticMetadata) do
       if metadata.accessCount > 10 or metadata.importance > 0.9 then
-         metadata.importance = math.min(1.0, metadata.importance * 1.02)
+         metadata.importance = math.min(1.0, metadata.importance * (self.hebbianStrengtheningRate * 0.4 + 0.6))  -- More conservative for semantic
       end
    end
    
